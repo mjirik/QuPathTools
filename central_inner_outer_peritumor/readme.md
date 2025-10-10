@@ -8,6 +8,7 @@ The algorithm needs two annotations:
 - Rough delineation of the region of tumor with precise delineation of boundary between tumor and healthy tissue (labeled as `selection`)
 
 
+The workflow is as follows:
 
 1) In the *QuPath* draw the annotation of `sample`. You can use the *Create thresholder* tool in `Classify -> Pixel classification -> Create thresholder`. Rename the annotation to `sample`.
    [![step1](step1.jpg)
