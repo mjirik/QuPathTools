@@ -13,6 +13,7 @@ The algorithm needs two annotations:
    [![step1](step1.jpg)
 2) Make the `selection` annotation using the *closed polygon annotation* tool.
    [![step2](step2.jpg)
-3) Run the script `cut_and_make_margin.groovy` in *QuPath*. It will create the `selection` annotation and cut the `sample` annotation to inner, outer and peritumor regions.
-   [![final_step](final_step.jpg) The script can be found [here](cut_and_make_margin.groovy).
+3) Run the script [`cut_and_make_margin.groovy`](cut_and_make_margin.groovy) in *QuPath*. It will create the `selection` annotation and cut the `sample` annotation to inner, outer and peritumor regions.
+   The script can be found [here](cut_and_make_margin.groovy).
+   [![final_step](final_step.jpg) 
 
