@@ -6,12 +6,17 @@ import traceback
 from loguru import logger
 import shutil
 import tqdm
-from typing import List
+from typing import List, Optional
 import copy
 
 import typer
 
-def fix_moved_projects_by_replace(actual_path:Path, old_strs:List[str], new_str:str, dry_run:bool=False):
+def fix_moved_projects_by_replace(actual_path:Path, old_strs:List[str], new_str:str,
+                                  short_str:Optional[str]=None,
+                                  long_str:Optional[str]=None,
+                                  n_chars:int=20,
+                                  dry_run:bool=False
+                                  ):
     """Fix paths in project.qproj files after moving the project to another location.
 
     :param qproj_file:  path to project.qproj file
@@ -34,6 +39,8 @@ def fix_moved_projects_by_replace(actual_path:Path, old_strs:List[str], new_str:
     # do logger with tqdm
     for qpproj_file in tqdm.tqdm(qpproj_files):
         process_qproj_file_by_replace(qpproj_file, old_strs, new_str, dry_run=dry_run)
+        if short_str is not None and long_str is not None:
+            check_qpproj_file_for_surroundings(qpproj_file, short_str, long_str, n_chars=n_chars)
 
 # def fix_moved_projects(actual_path:Path, old_path:Path, new_path:Path, dry_run:bool=False):
 #     """Fix paths in project.qproj files after moving the project to another location.
@@ -66,7 +73,56 @@ def fix_moved_projects_by_replace(actual_path:Path, old_strs:List[str], new_str:
 #         #     logger.exception(f"JSON decode error in {qproj_file}: {traceback.format_exc()}")
 
 
-def process_qproj_file_by_replace(qpproj_file:Path, old_strs:List[str], new_str:str, dry_run:bool=False):
+def find_string_in_text_and_check_its_surroundings(text:str, search_str:str, long_str:str, n_chars:int=10):
+    """
+    Find the search_str in text and check if the long_str is in the vicinity of n_chars
+    :param text: text to search in
+    :param search_str: string to search for
+    :param long_str: string to check if it is in the vicinity of search_str
+    :param n_chars: number of characters to check
+    :return: True if long_str is in the vicinity of search_str
+    """
+    # find all occurences of search_str
+
+    indexes = [i for i in range(len(text)) if text.startswith(search_str, i)]
+
+    problematic_contexts = []
+    # idx = text.find(search_str)
+    for idx in indexes:
+        if idx == -1:
+            continue
+        context = text[idx-n_chars:(idx + len(search_str) +n_chars)]
+        if long_str in context:
+            # return True, context
+            pass
+        else:
+            problematic_contexts.append(context)
+    return problematic_contexts
+
+def check_qpproj_file_for_surroundings(qpproj_file:Path, search_str:str, long_str:str, n_chars:int=20, ignore_oserror:bool=True):
+    assert qpproj_file.exists(), f"File {qpproj_file} does not exist."
+    with open(qpproj_file, "r") as file:
+        try:
+            data = file.read()
+        except OSError as e:
+            if not ignore_oserror:
+                tqdm.tqdm.write(f"Error reading {qpproj_file}. Check if the file is offline in Synology Drive Client.")
+            # logger.exception(f"Error reading {qpproj_file}")
+            # raise e
+            return
+
+    problematic_contexts = find_string_in_text_and_check_its_surroundings(data, search_str, long_str, n_chars=n_chars)
+    if len(problematic_contexts) > 0:
+        tqdm.tqdm.write(f"Found {len(problematic_contexts)} problematic contexts in {qpproj_file}")
+        problematic_contexts = set(problematic_contexts)
+        for problematic_context in problematic_contexts:
+            tqdm.tqdm.write(problematic_context)
+    return problematic_contexts
+
+
+def process_qproj_file_by_replace(
+        qpproj_file:Path, old_strs:List[str], new_str:str, dry_run:bool=False,
+):
     qpproj_file = Path(qpproj_file)
 
     # make_backup_qpproj_file(qpproj_file, dry_run)
@@ -88,11 +144,14 @@ def process_qproj_file_by_replace(qpproj_file:Path, old_strs:List[str], new_str:
 
     for old_str in old_strs:
         # find and replace all occurences of old_str with new_str and count changes
+        # count number of occurences of old_str in data
+        # n_occurences = data.count(old_str)
+        # tqdm.tqdm.write(f"String {old_str} found {n_occurences} times")
         data = data.replace(old_str, new_str)
     # is there any change?
     if data != data_orig:
-        # tqdm.write(f"    {old_str} --> {new_str}")
         if not dry_run:
+            # tqdm.tqdm.write(f"    {old_str} --> {new_str}")
             datetime_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             backup_fn = qpproj_file.with_suffix(f".backup.{datetime_str}.qpproj")
             with open(backup_fn, "w") as f:
