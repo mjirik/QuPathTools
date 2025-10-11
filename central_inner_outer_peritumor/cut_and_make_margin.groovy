@@ -35,7 +35,7 @@ def getInnerImageGeometry(double margin_um) {
     double sy = cal.getPixelHeightMicrons()
 
     if (!(sx>0) || !(sy>0)) {
-        print "⚠️ Neplatná kalibrace pixelů (sx=${sx}, sy=${sy}) – beru 1 µm/px."
+        print "⚠️ Calibration of pixels is not valid (sx=${sx}, sy=${sy}) – using 1 µm/px."
         sx = 1.0; sy = 1.0
     }
 
@@ -63,7 +63,7 @@ def getInnerImageGeometry(double margin_um) {
     }
 
     if (innerPx.isEmpty()) {
-        print "⚠️ Margin ${margin_um} µm je příliš velký – maska by zmizela."
+        print "⚠️ Margin ${margin_um} µm is to high. No space for mask left inside the image."
         return null
     }
 
@@ -117,9 +117,14 @@ def annotations = getAnnotationObjects()
 def annSample = annotations.find { it.getName() == 'sample' }
 def segPolygon = annotations.find { it.getName() == 'selection' }
 
-if (!annSample || !segPolygon) {
-    print "❌ Annotation 'sample' or 'selection' not found"
-    Dialogs.showErrorMessage("Error", "Annotation 'sample' or 'selection' not found")
+if (!annSample) {
+    print "❌ Annotation 'sample' not found"
+    Dialogs.showErrorMessage("Error", "Annotation 'sample' not found")
+    return
+}
+if (!segPolygon) {
+    print "❌ Annotation 'selection' not found"
+    Dialogs.showErrorMessage("Error", "Annotation selection' not found")
     return
 }
 
