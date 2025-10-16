@@ -112,10 +112,53 @@ def addAnnotationFromGeometry(geom, name, pathClassName="Default", color=null, i
 
 /////////////////////////////////////
 
+
+// === Najdi anotace ===
+def annotations = getAnnotationObjects()
+if (annotations.isEmpty()) {
+    print "❌ No annotations found!"
+    return
+}
+
+// === Najdi Tumor (podle jména nebo třídy) ===
+def annTumor = annotations.find { 
+    it.getName()?.equalsIgnoreCase("Tumor") ||
+    it.getName()?.equalsIgnoreCase("tumor") ||
+    it.getPathClass()?.getName()?.equalsIgnoreCase("Tumor")
+}
+
+if (!annTumor) {
+    print "⚠️ No annotation named or classified as 'Tumor' found."
+}
+
+// === Najdi Sample ===
+def annSample = annotations.find { 
+    it.getName()?.equalsIgnoreCase("Sample") ||
+    it.getPathClass()?.getName()?.equalsIgnoreCase("Sample")
+}
+
+// === Pokud Sample nenajdeme, ale máme jen dvě anotace ===
+if (!annSample && annotations.size() == 2 && annTumor) {
+    annSample = annotations.find { it != annTumor }
+    print "ℹ️ Using the other annotation as 'Sample'."
+}
+
+// === Kontrola výsledků ===
+if (!annTumor || !annSample) {
+    print "❌ Could not find both 'Tumor' and 'Sample' annotations."
+    print "   Found: Tumor=${annTumor != null}, Sample=${annSample != null}"
+    return
+}
+
+print "✅ Tumor annotation: ${annTumor.getName()} (${annTumor.getPathClass()?.getName()})"
+print "✅ Sample annotation: ${annSample.getName()} (${annSample.getPathClass()?.getName()})"
+
+
+/*
 // === Check the requred annotations ===
 def annotations = getAnnotationObjects()
 def annSample = annotations.find { it.getName() == 'sample' }
-def segPolygon = annotations.find { it.getName() == 'selection' }
+def segPolygon = annotations.find { it.getName() == 'Tumor' }
 
 if (!annSample) {
     print "❌ Annotation 'sample' not found"
@@ -127,6 +170,11 @@ if (!segPolygon) {
     Dialogs.showErrorMessage("Error", "Annotation selection' not found")
     return
 }
+
+
+*/
+
+
 
 def imagePlane = annSample.getROI().getImagePlane()
 
