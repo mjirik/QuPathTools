@@ -12,15 +12,16 @@ The workflow is as follows:
 
 1) In the *QuPath* draw the annotation of `tumor`. You can use the *Magic Wand* tool. 
 
-   ![step1](step1.jpg)
+   ![step0](step0.png)
+2) Run the script [`tumor_peritumor_01_duplicate_and_rename.groovy`](tumor_peritumor_01_duplicate_and_rename.groovy) in *QuPath*. It will duplicate and then rename to `sample` and `tumor`.
 
-2) Make the `selection` annotation using the *closed polygon annotation* tool.
+3) Finish the `sample` annotation. You can use the *Magic Wand* tool and then correct it by the *Brush* tool. The holes will be filled automatically in the next step.
 
-   ![step2](step2.jpg)
+   ![step3](step3.png)
 
-3) Run the script [`cut_and_make_margin.groovy`](cut_and_make_margin.groovy) in *QuPath*. It will create the `selection` annotation and cut the `sample` annotation to inner, outer and peritumor regions.
-   The script can be found [here](cut_and_make_margin.groovy).
+4) Run the script [`tumor_peritumor_02_create`](tumor_peritumor_02_create.groovy) in *QuPath*. 
+   It will create the  annotation to inner, outer and peritumor regions.
 
-   ![final_step](final_step.jpg) 
+   ![final_step](final_step.png) 
 
 
