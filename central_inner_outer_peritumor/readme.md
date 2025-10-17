@@ -7,6 +7,8 @@ The algorithm needs two annotations:
 - Precise delineation of the sample (labeled as `sample`)
 - Rough delineation of the region of tumor with precise delineation of boundary between tumor and healthy tissue (labeled as `tumor`)
 
+Check the video tutorial:
+[![▶️ Watch on YouTube](https://img.youtube.com/vi/U68jLRkaqPs/0.jpg)](https://youtu.be/U68jLRkaqPs)
 
 The workflow is as follows:
 
