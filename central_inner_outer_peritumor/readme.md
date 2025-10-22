@@ -28,3 +28,8 @@ The workflow is as follows:
    ![final_step](final_step.png) 
 
 
+
+# Download the scripts
+
+* [tumor_peritumor_01_duplicate_and_rename.groovy](tumor_peritumor_01_duplicate_and_rename.groovy)
+* [tumor_peritumor_02_create.groovy](tumor_peritumor_02_create.groovy)
